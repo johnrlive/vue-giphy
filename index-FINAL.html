@@ -57,36 +57,14 @@
     <h1 class="title">Fight!</h1>
 
     <div class="columns" v-if="battleGifs">
-    <div class="column is-half">
-
-      <!-- gif one -->
-      <div class="box" v-if="battleGifs.gif_one">
-        <super-gif 
-          :gif="battleGifs.gif_one.url" :caption="battleGifs.gif_one.caption">
-        </super-gif>
-        
-        <a class="button is-large is-warning" @click="voteOnGif(battleGifs.gif_one.id)">
-          Vote!
-        </a>
+      <!-- loop over the battle gifs -->
+      <div class="column is-half" v-for="gif in battleGifs">
+        <div class="gif-container">
+          <img :src="gif.url">
+          <div class="caption">{{ gif.caption }}</div>
+        </div>
+        <a class="button is-warning" @click="voteOnGif(gif.id)">Vote!</a>
       </div>
-
-    </div>
-    <div class="column is-half">
-
-      <!-- gif two -->
-      <div class="box" v-if="battleGifs.gif_two">
-        <super-gif 
-          :gif="battleGifs.gif_two.url" 
-          :caption="battleGifs.gif_two.caption">
-        </super-gif>
-
-        <a 
-          class="button is-large is-warning" 
-          @click="voteOnGif(battleGifs.gif_two.id)">
-            Vote!
-        </a>
-      </div>
-    </div>
     </div>
 
   </div>
@@ -109,20 +87,8 @@
 
       <input type="text" class="input" v-model="caption">
 
-      <a 
-        href="#" 
-        class="button is-large is-success" 
-        @click="saveGif"
-        v-if="isLoggedIn">
-          Create
-      </a>
-
-      <a 
-        class="button is-large is-success" 
-        @click="login" 
-        v-if="!isLoggedIn">
-          Login to Create
-      </a>
+      <a class="button is-success" @click="saveGif" v-if="isLoggedIn">Create</a>
+      <a class="button is-success" @click="login" v-if="!isLoggedIn">Login to Create</a>
     </div>
 
   </div>
@@ -145,7 +111,7 @@
         <tr v-for="(gif, index) in leaderboard">
           <td>{{ index + 1 }}</td>
           <td>
-            <super-gif :gif="gif.url" :caption="gif.caption" :width="200"></super-gif>
+            <super-gif :gif="gif.url" :caption="gif.caption"></super-gif>
           </td>
           <td>
             {{ gif.votes }}
@@ -233,13 +199,15 @@
         // vote on a certain gif in a battle 
         voteOnGif: function(id) {
           axios.post(`${this.apiUrl}/vote`, { id })
-                .then(response => this.getGifBattle());
+                .then(response => {
+                  this.getGifBattle();
+                  this.getLeaderboard();
+                });
         },
         
         // get the leaderboard 
         getLeaderboard: function() {
-          const url = `${this.apiUrl}/leaderboard`;
-          axios.get(url)
+          axios.get(`${this.apiUrl}/leaderboard`)
                 .then(response => this.leaderboard = response.data);
         },
 
